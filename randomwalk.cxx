@@ -11,6 +11,9 @@ struct colloid{
 
 void init(colloid* const c, const int N);
 void print(const colloid* const c, const int N, const string fname);
+void conditions(int* const rx, int* const ry, const int N);
+void pusher(const int* const rx, const int* const ry, const int N, colloid* const c);
+void statistics(const colloid* const c, double& meanx, double& meany, double& var, const int N);
 
 int main(void){
   
@@ -44,9 +47,9 @@ int main(void){
     
     for(int i = 1; i <= Nfiles; i++){
 	for(int j = 0; j < Nsubsteps; j++){
-	    // call to function which randomly sets up rx and ry
-	    // call to function which pushes all colloids according to rx and ry
-	    // call to function which evaluates statistics
+	    conditions(rx,ry,N); // call to function which randomly sets up rx and ry
+	    pusher(rx,ry,N,c);// call to function which pushes all colloids according to rx and ry
+	    statistics(c, meanx, meany, var, N);// call to function which evaluates statistics
 	    stat << (i-1)*Nsubsteps+j << "\t" << meanx << "\t";
 	    stat << meany << "\t" << var << endl;
 	}
@@ -67,6 +70,36 @@ void init(colloid* const c, const int N){
 	c[i].x = 0;
 	c[i].y = 0;
     }
+}
+
+void conditions(int* const rx, int* const ry, const int N){
+    for(int i=0; i<N; i++){
+      rx[i] = rand()%3-1;
+      ry[i] = rand()%3-1;
+    }
+}
+
+void pusher(const int* const rx, const int* const ry, const int N, colloid* const c){
+    for(int i=0; i<N; i++){
+      c[i].x += rx[i];
+      c[i].y += ry[i];
+    }
+}
+
+void statistics(const colloid* const c, double& meanx, double& meany, double& var, const int N){
+    meanx=0;
+    meany=0;
+    var=0;
+    for(int i=0; i<N; i++){
+      meanx += c[i].x;
+      meany += c[i].y;
+    }
+    meanx /= N;
+    meany /= N;
+    for(int i=0; i<N; i++){
+      var += (c[i].x-meanx)*(c[i].x-meanx)+(c[i].y-meany)*(c[i].y-meany);
+    }
+    var /= N;
 }
 
 void print(const colloid* const c, const int N, const string fname){
